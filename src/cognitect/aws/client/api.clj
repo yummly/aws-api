@@ -127,7 +127,7 @@
   (service/response-spec-key (-> client client/-get-info :service) op))
 
 (def ^:private pprint-ref (delay (util/dynaload 'clojure.pprint/pprint)))
-(defn pprint
+(defn ^:skip-wiki pprint
   "For internal use. Don't call directly."
   [& args]
   (binding [*print-namespace-maps* false]

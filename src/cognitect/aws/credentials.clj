@@ -36,7 +36,7 @@
 
 ;; Credentials subsystem
 
-(defn auto-refresh-fn
+(defn ^:skip-wiki auto-refresh-fn
   "For internal use. Don't call directly.
 
   Return the function to auto-refresh the `credentials` atom using the given `provider`.
@@ -90,7 +90,7 @@
   (-stop credentials)
   nil)
 
-(defn valid-credentials
+(defn ^:skip-wiki valid-credentials
   "For internal use. Don't call directly."
   ([credentials]
    (valid-credentials credentials nil))
@@ -219,7 +219,7 @@
            (catch Throwable t
              (log/error t "Error fetching credentials from aws profiles file"))))))))
 
-(defn calculate-ttl
+(defn ^:skip-wiki calculate-ttl
   "For internal use. Don't call directly."
   [credentials]
   (if-let [expiration (some-> credentials :Expiration Instant/parse)]

@@ -4,7 +4,7 @@
 (ns cognitect.aws.retry
   (:require [clojure.core.async :as a]))
 
-(defn with-retry
+(defn ^:skip-wiki with-retry
   "For internal use. Do not call directly.
 
   Calls req-fn, a function that wraps some operation and returns a
