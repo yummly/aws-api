@@ -8,7 +8,8 @@
             [clojure.core.async :as a]
             [cognitect.http-client :as http]
             [cognitect.aws.util :as u]
-            [cognitect.aws.retry :as retry])
+            [cognitect.aws.retry :as retry]
+            [clojure.tools.logging :as log])
   (:import (java.net URI)))
 
 (def ^:const ec2-metadata-service-override-system-property "com.amazonaws.sdk.ec2MetadataServiceEndpointOverride")
@@ -49,13 +50,18 @@
    :server-port (or (when (pos? (.getPort uri)) (.getPort uri)) (when (= (.getScheme uri) :https) 443) 80)
    :uri (.getPath uri)
    :request-method :get
-   :headers {:accept "*/*"}})
+   :headers {:accept "*/*"}
+   :cognitect.http-client/timeout-msec 200})
 
 (defn get-data [uri]
   (let [response (a/<!! (retry/with-retry
-                          #(http/submit (http/create {}) (request-map (URI. uri)))
+                          #(http/submit (http/create {:resolve-timeout 500 :connect-timeout 500})
+                                        (request-map (URI. uri)))
                           (a/promise-chan)
-                          retry/default-retriable?
+                          (fn [http-response]
+                            (when (:cognitect.anomalies/category http-response)
+                              (log/warnf "EC2 or ECS get-data failed: %s" http-response))
+                            (retry/default-retriable? http-response))
                           retry/default-backoff))]
     ;; TODO: handle unhappy paths -JS
     (when (= 200 (:status response))
